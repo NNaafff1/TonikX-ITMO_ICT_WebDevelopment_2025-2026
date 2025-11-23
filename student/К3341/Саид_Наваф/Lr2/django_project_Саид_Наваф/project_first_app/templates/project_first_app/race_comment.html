@@ -1,41 +1,46 @@
+
+
+
 {% extends 'project_first_app/base.html' %}
+
+{% load racing_filters %}
 
 {% block title %}Add Comment - {{ race.name }}{% endblock %}
 
 {% block content %}
-<div class="header">
-    <h1>💬 Add Comment for {{ race.name }}</h1>
-    <p>Share your thoughts about this race</p>
-    <a href="{% url 'race_detail' race.id %}" class="back-link">← Back to Race Details</a>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="display-5 mb-0">💬 Add Comment for {{ race.name }}</h1>
+        <p class="text-muted">Share your thoughts about this race</p>
+    </div>
+    <a href="{% url 'race_detail' race.id %}" class="btn btn-secondary btn-lg">← Back to Race Details</a>
 </div>
 
-<div class="card">
-    <form method="POST" class="form-container">
-        {% csrf_token %}
-        
-        <div class="form-group">
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form method="POST">
+            {% csrf_token %}
             {% for field in form %}
-            <div class="form-field">
-                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                {{ field }}
+            <div class="mb-3">
+                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                {{ field|add_class:'form-control' }}
                 {% if field.help_text %}
-                <small class="help-text">{{ field.help_text }}</small>
+                <div class="form-text">{{ field.help_text }}</div>
                 {% endif %}
                 {% if field.errors %}
-                <div class="error-list">
+                <div class="alert alert-danger mt-2 mb-0 p-2">
                     {% for error in field.errors %}
-                    <span class="error">{{ error }}</span>
+                    <div>{{ error }}</div>
                     {% endfor %}
                 </div>
                 {% endif %}
             </div>
             {% endfor %}
-        </div>
-        
-        <div class="form-actions">
-            <button type="submit" class="submit-btn">Submit Comment</button>
-            <a href="{% url 'race_detail' race.id %}" class="cancel-btn">Cancel</a>
-        </div>
-    </form>
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary flex-fill">Submit Comment</button>
+                <a href="{% url 'race_detail' race.id %}" class="btn btn-outline-secondary flex-fill">Cancel</a>
+            </div>
+        </form>
+    </div>
 </div>
 {% endblock %}
