@@ -1,12 +1,12 @@
 {% extends 'project_first_app/base.html' %}
 
-{% block title %}Add New Owner{% endblock %}
+{% block title %}Register New Racer{% endblock %}
 
 {% block content %}
 <div class="header">
-    <h1>➕ {% if form.instance.pk %}Edit{% else %}Add New{% endif %} Owner</h1>
-    <p>{% if form.instance.pk %}Update owner information{% else %}Register a new car owner in the system{% endif %}</p>
-    <a href="{% url 'owner_list' %}" class="back-link">← Back to All Owners</a>
+    <h1>🏎️ Register New Racer</h1>
+    <p>Create a new racing driver account</p>
+    <a href="{% url 'racer_list' %}" class="back-link">← Back to All Racers</a>
 </div>
 
 <div class="card">
@@ -34,9 +34,9 @@
         
         <div class="form-actions">
             <button type="submit" class="submit-btn">
-                {% if form.instance.pk %}Update{% else %}Save{% endif %} Owner
+                Register Racer
             </button>
-            <a href="{% url 'owner_list' %}" class="cancel-btn">Cancel</a>
+            <a href="{% url 'racer_list' %}" class="cancel-btn">Cancel</a>
         </div>
     </form>
 </div>
@@ -70,9 +70,9 @@
 }
 
 .form-control:focus {
-    border-color: #667eea;
+    border-color: #dc3545;
     outline: none;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
 }
 
 .help-text {
@@ -101,7 +101,7 @@
 }
 
 .submit-btn {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #dc3545, #c82333);
     color: white;
     padding: 12px 30px;
     border: none;
@@ -133,6 +133,16 @@
     background: #5a6268;
     color: white;
     transform: translateY(-2px);
+}
+
+/* Style select dropdowns */
+select.form-control {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 12px center;
+    background-repeat: no-repeat;
+    background-size: 16px;
+    padding-right: 40px;
 }
 </style>
 {% endblock %}

@@ -1,12 +1,12 @@
 {% extends 'project_first_app/base.html' %}
 
-{% block title %}{% if form.instance.pk %}Edit{% else %}Add New{% endif %} Racing Car{% endblock %}
+{% block title %}Register for {{ race.name }}{% endblock %}
 
 {% block content %}
 <div class="header">
-    <h1>🚗 {% if form.instance.pk %}Edit{% else %}Add New{% endif %} Racing Car</h1>
-    <p>{% if form.instance.pk %}Update car information{% else %}Register a new racing car{% endif %}</p>
-    <a href="{% url 'car_list' %}" class="back-link">← Back to All Cars</a>
+    <h1>📝 Register for {{ race.name }}</h1>
+    <p>Select your car for this race</p>
+    <a href="{% url 'race_detail' race.id %}" class="back-link">← Back to Race Details</a>
 </div>
 
 <div class="card">
@@ -33,10 +33,8 @@
         </div>
         
         <div class="form-actions">
-            <button type="submit" class="submit-btn">
-                {% if form.instance.pk %}Update{% else %}Save{% endif %} Car
-            </button>
-            <a href="{% url 'car_list' %}" class="cancel-btn">Cancel</a>
+            <button type="submit" class="submit-btn">Register for Race</button>
+            <a href="{% url 'race_detail' race.id %}" class="cancel-btn">Cancel</a>
         </div>
     </form>
 </div>

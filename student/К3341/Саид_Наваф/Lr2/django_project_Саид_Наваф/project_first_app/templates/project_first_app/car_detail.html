@@ -5,7 +5,7 @@
 {% block content %}
 <div class="header">
     <h1>🚗 Car Details</h1>
-    <p>Complete information about the car</p>
+    <p>Complete information about the racing car</p>
     <a href="{% url 'car_list' %}" class="back-link">← Back to All Cars</a>
 </div>
 
@@ -34,10 +34,36 @@
         </div>
         
         <div class="detail-item">
+            <span class="detail-label">Team:</span>
+            <span class="detail-value">{{ car.team.name|default:"No team" }}</span>
+        </div>
+        
+        {% if car.max_speed %}
+        <div class="detail-item">
+            <span class="detail-label">Max Speed:</span>
+            <span class="detail-value">{{ car.max_speed }} km/h</span>
+        </div>
+        {% endif %}
+        
+        {% if car.engine_power %}
+        <div class="detail-item">
+            <span class="detail-label">Engine Power:</span>
+            <span class="detail-value">{{ car.engine_power }} HP</span>
+        </div>
+        {% endif %}
+        
+        <div class="detail-item">
             <span class="detail-label">Car ID:</span>
             <span class="detail-value">#{{ car.id }}</span>
         </div>
     </div>
+
+    {% if car.car_description %}
+    <div class="detail-item">
+        <span class="detail-label">Description:</span>
+        <span class="detail-value">{{ car.car_description }}</span>
+    </div>
+    {% endif %}
 
     <div class="action-buttons" style="margin-top: 2rem;">
         <a href="{% url 'car_update' car.id %}" class="action-btn edit">Edit Car</a>

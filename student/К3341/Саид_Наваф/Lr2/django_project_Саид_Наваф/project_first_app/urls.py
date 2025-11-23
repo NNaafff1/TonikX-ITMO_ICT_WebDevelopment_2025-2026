@@ -5,22 +5,27 @@ urlpatterns = [
     # Home page
     path('', views.home, name='home'),
     
-    # Owner URLs (Functional views)
-    path('owners/', views.owner_list, name='owner_list'),
-    path('owners/<int:owner_id>/', views.owner_detail, name='owner_detail'),
-    path('owners/create/', views.create_owner, name='create_owner'),
+    # Racer URLs
+    path('racers/', views.racer_list, name='racer_list'),
+    path('racers/<int:racer_id>/', views.racer_detail, name='racer_detail'),
+    path('racers/register/', views.register_user, name='register_user'),
     
-    # Car URLs (Class-based views)
+    # Race URLs
+    path('races/', views.RaceListView.as_view(), name='race_list'),
+    path('races/<int:pk>/', views.RaceDetailView.as_view(), name='race_detail'),
+    path('races/<int:race_id>/register/', views.race_register, name='race_register'),
+    path('races/registration/<int:registration_id>/delete/', views.race_unregister, name='race_unregister'),
+    path('races/<int:race_id>/comment/', views.add_race_comment, name='add_race_comment'),
+    path('results/', views.race_results, name='race_results'),
+    
+    # Car URLs (FIXED - remove typos)
     path('cars/', views.CarListView.as_view(), name='car_list'),
     path('cars/<int:pk>/', views.CarDetailView.as_view(), name='car_detail'),
     path('cars/create/', views.CarCreateView.as_view(), name='car_create'),
     path('cars/<int:pk>/update/', views.CarUpdateView.as_view(), name='car_update'),
     path('cars/<int:pk>/delete/', views.CarDeleteView.as_view(), name='car_delete'),
     
-    # Driver License URLs (Class-based views)
-    path('licenses/', views.DriverLicenseListView.as_view(), name='driverlicense_list'),
-    path('licenses/<int:pk>/', views.DriverLicenseDetailView.as_view(), name='driverlicense_detail'),
-    path('licenses/create/', views.DriverLicenseCreateView.as_view(), name='driverlicense_create'),
-    path('licenses/<int:pk>/update/', views.DriverLicenseUpdateView.as_view(), name='driverlicense_update'),
-    path('licenses/<int:pk>/delete/', views.DriverLicenseDeleteView.as_view(), name='driverlicense_delete'),
+    # Team URLs
+    path('teams/', views.TeamListView.as_view(), name='team_list'),
+    path('teams/<int:pk>/', views.TeamDetailView.as_view(), name='team_detail'),
 ]
