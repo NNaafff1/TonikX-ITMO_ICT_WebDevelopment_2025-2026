@@ -1,0 +1,72 @@
+{% extends 'project_first_app/base.html' %}
+
+{% block title %}{{ owner.first_name }} {{ owner.last_name }} - Details{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h1>👤 Owner Details</h1>
+    <p>Complete information about the car owner</p>
+    <a href="{% url 'owner_list' %}" class="back-link">← Back to All Owners</a>
+</div>
+
+<div class="card">
+    <h2>{{ owner.first_name }} {{ owner.last_name }}</h2>
+    
+    <div class="detail-grid">
+        <div class="detail-item">
+            <span class="detail-label">First Name:</span>
+            <span class="detail-value">{{ owner.first_name }}</span>
+        </div>
+        
+        <div class="detail-item">
+            <span class="detail-label">Last Name:</span>
+            <span class="detail-value">{{ owner.last_name }}</span>
+        </div>
+        
+        <div class="detail-item">
+            <span class="detail-label">Date of Birth:</span>
+            <span class="detail-value">{{ owner.date_of_birth }}</span>
+        </div>
+        
+        <div class="detail-item">
+            <span class="detail-label">Owner ID:</span>
+            <span class="detail-value">#{{ owner.id }}</span>
+        </div>
+    </div>
+</div>
+
+{% if ownerships %}
+<div class="card">
+    <h3>🚗 Car Ownership History</h3>
+    <div class="detail-grid">
+        {% for ownership in ownerships %}
+        <div class="detail-item">
+            <span class="detail-label">{{ ownership.car.brand }} {{ ownership.car.model }}</span>
+            <span class="detail-value">
+                {{ ownership.start_date }} - {% if ownership.end_date %}{{ ownership.end_date }}{% else %}Present{% endif %}
+            </span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+{% if driver_license %}
+<div class="card">
+    <h3>📋 Driver License Information</h3>
+    <div class="detail-grid">
+        <div class="detail-item">
+            <span class="detail-label">License Number:</span>
+            <span class="detail-value">{{ driver_license.license_number }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">License Type:</span>
+            <span class="detail-value">{{ driver_license.get_license_type_display }}</span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Issue Date:</span>
+            <span class="detail-value">{{ driver_license.issue_date }}</span>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

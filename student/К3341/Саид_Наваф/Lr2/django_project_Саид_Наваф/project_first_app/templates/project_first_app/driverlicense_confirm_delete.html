@@ -1,0 +1,73 @@
+{% extends 'project_first_app/base.html' %}
+
+{% block title %}Delete Driver License{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h1>🗑️ Delete Driver License</h1>
+    <p>Confirm deletion of driver license record</p>
+</div>
+
+<div class="card">
+    <h2>Are you sure you want to delete this driver license?</h2>
+    
+    <div class="license-info">
+        <h3>License #{{ object.license_number }}</h3>
+        <p><strong>Owner:</strong> {{ object.owner }}</p>
+        <p><strong>Type:</strong> {{ object.get_license_type_display }}</p>
+        <p><strong>Issue Date:</strong> {{ object.issue_date }}</p>
+    </div>
+
+    <form method="POST" class="delete-form">
+        {% csrf_token %}
+        <div class="form-actions">
+            <button type="submit" class="delete-btn">Yes, Delete</button>
+            <a href="{% url 'driverlicense_list' %}" class="cancel-btn">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<style>
+.license-info {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin: 1.5rem 0;
+}
+
+.delete-form {
+    margin-top: 2rem;
+}
+
+.delete-btn {
+    background: #dc3545;
+    color: white;
+    padding: 12px 30px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.delete-btn:hover {
+    background: #c82333;
+    transform: translateY(-2px);
+}
+
+.cancel-btn {
+    background: #6c757d;
+    color: white;
+    padding: 12px 30px;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background 0.3s ease;
+}
+
+.cancel-btn:hover {
+    background: #5a6268;
+    color: white;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends 'project_first_app/base.html' %}
+
+{% block title %}{% if form.instance.pk %}Edit{% else %}Add New{% endif %} Driver License{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h1>📋 {% if form.instance.pk %}Edit{% else %}Add New{% endif %} Driver License</h1>
+    <p>{% if form.instance.pk %}Update license information{% else %}Register a new driver license{% endif %}</p>
+    <a href="{% url 'driverlicense_list' %}" class="back-link">← Back to All Licenses</a>
+</div>
+
+<div class="card">
+    <form method="POST" class="form-container">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            {% for field in form %}
+            <div class="form-field">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                <small class="help-text">{{ field.help_text }}</small>
+                {% endif %}
+                {% if field.errors %}
+                <div class="error-list">
+                    {% for error in field.errors %}
+                    <span class="error">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="submit-btn">
+                {% if form.instance.pk %}Update{% else %}Save{% endif %} License
+            </button>
+            <a href="{% url 'driverlicense_list' %}" class="cancel-btn">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<style>
+/* Make sure the owner dropdown looks good */
+.form-control {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e1e5e9;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Style the select dropdown specifically */
+select.form-control {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 12px center;
+    background-repeat: no-repeat;
+    background-size: 16px;
+    padding-right: 40px;
+}
+</style>
+{% endblock %}
