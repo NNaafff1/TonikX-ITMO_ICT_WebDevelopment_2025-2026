@@ -36,5 +36,5 @@ def main():
     send_loop(s)
     s.close()
 
-if name == "main":
+if __name__ == "__main__":
     main()

@@ -60,5 +60,5 @@ def main():
             conn, addr = s.accept()
             threading.Thread(target=handle_client, args=(conn, addr), daemon=True).start()
 
-if name == "main":
+if __name__ == "__main__":
     main()

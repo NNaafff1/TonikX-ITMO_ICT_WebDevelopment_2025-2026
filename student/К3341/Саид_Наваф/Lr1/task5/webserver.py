@@ -7,7 +7,7 @@ HOST = "127.0.0.1"
 PORT = 8081
 
 class MyHTTPServer:
-    def init(self, host, port, persist=None):
+    def __init__(self, host, port, persist=None):  # Fixed: __init__ instead of init
         self.host = host
         self.port = port
         self.lessons = Lessons(persist)
@@ -51,7 +51,7 @@ class MyHTTPServer:
         first_line = self.recv_line(conn)
         if not first_line:
             raise ConnectionError("No request line")
-        method, url, version = first_line.strip().split(" ", 3-1)  # split into exactly three pieces
+        method, url, version = first_line.strip().split(" ", 2)  # Fixed: use 2 instead of 3-1
         headers = self.parse_headers(conn)
         body = None
         if "content-length" in headers:
@@ -90,6 +90,6 @@ class MyHTTPServer:
         resp = self.handle_request(req)
         self.send_response(conn, resp)
 
-if name == "main":
+if __name__ == "__main__":
     s = MyHTTPServer(HOST, PORT, persist="grades.json")
     s.serve_forever()

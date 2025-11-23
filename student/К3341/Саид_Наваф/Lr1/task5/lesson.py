@@ -3,7 +3,7 @@ from typing import Dict
 from request import Request, Response
 
 class Lessons:
-    def init(self, persist_file: str = None):
+    def __init__(self, persist_file: str = None):  # Fixed: __init__ instead of init
         self.lessons: Dict[str, int] = {}
         self.persist_file = persist_file
         if self.persist_file:
