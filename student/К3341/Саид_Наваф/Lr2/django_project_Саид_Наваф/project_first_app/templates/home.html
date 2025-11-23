@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Car Owners{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h1>🚗 Car Owners Database</h1>
+    <p>Manage and view car owner information</p>
+</div>
+
+<div class="card">
+    <h2>Available Owners</h2>
+    {% if owners %}
+        <div class="owner-list">
+            {% for owner in owners %}
+                <div class="card owner-card">
+                    <h3>{{ owner.first_name }} {{ owner.last_name }}</h3>
+                    <div class="detail-item">
+                        <span class="detail-label">Date of Birth:</span>
+                        <span class="detail-value">{{ owner.date_of_birth }}</span>
+                    </div>
+                    <a href="{% url 'owner_detail' owner.id %}" class="owner-link">
+                        View Full Details →
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="no-owners">
+            <p>No owners found in the database.</p>
+            <p>Please add some owners through the <a href="/admin/">admin panel</a>.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
