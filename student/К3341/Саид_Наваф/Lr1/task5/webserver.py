@@ -1,7 +1,7 @@
 import socket
 import json
 from request import Request, Response
-from lesson import Lessons, parse_get_grades_req, parse_set_grades_req
+from lesson import Lessons, parse_get_grades_req, parse_set_grades_req, get_add_grade_form_html, parse_set_grades_form
 
 HOST = "127.0.0.1"
 PORT = 8081
@@ -79,10 +79,18 @@ class MyHTTPServer:
         conn.sendall(out)
 
     def handle_request(self, req: Request) -> Response:
+        # Serve HTML form at root
+        if req.method == "GET" and req.url == "/":
+            return Response(200, "OK", body=get_add_grade_form_html())
+        # View grades
         if req.method == "GET" and req.url == "/grades":
             return parse_get_grades_req(self.lessons, req)
+        # Accept JSON POST to /grades (API)
         if req.method == "POST" and req.url == "/grades":
             return parse_set_grades_req(self.lessons, req)
+        # Accept form POST from HTML form
+        if req.method == "POST" and req.url == "/add":
+            return parse_set_grades_form(self.lessons, req)
         return Response(404, "Not Found", body="Not Found")
 
     def serve_client(self, conn):
