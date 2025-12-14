@@ -1,60 +1,53 @@
+# app/serializers.py
 from rest_framework import serializers
-from .models import Owner, DriverLicense, Car, Ownership
+from .models import Owner, OwnerContact, DriverLicense, VehicleModel, Car, Ownership, InsurancePolicy, ServiceRecord, Registration
 
-class CarSerializer(serializers.ModelSerializer):
+class OwnerContactSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Car
-        fields = ["id", "make", "model", "color", "vin", "reg_number"]
+        model = OwnerContact
+        fields = '__all__'
 
 class DriverLicenseSerializer(serializers.ModelSerializer):
     class Meta:
         model = DriverLicense
-        fields = ["id", "license_number", "license_type", "issue_date"]
+        fields = '__all__'
 
-class OwnershipCarSerializer(serializers.ModelSerializer):
-    # nested representation of the car inside ownership
-    car = CarSerializer(read_only=True)
+class VehicleModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VehicleModel
+        fields = '__all__'
 
+class CarListSerializer(serializers.ModelSerializer):
+    vehicle_model = VehicleModelSerializer(read_only=True)
+    class Meta:
+        model = Car
+        fields = ['id','vin','registration_number','year','color','vehicle_model']
+
+class InsurancePolicySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InsurancePolicy
+        fields = '__all__'
+
+class ServiceRecordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ServiceRecord
+        fields = '__all__'
+
+class RegistrationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Registration
+        fields = '__all__'
+
+class OwnershipSerializer(serializers.ModelSerializer):
+    car = CarListSerializer(read_only=True)
     class Meta:
         model = Ownership
-        fields = ["id", "car", "date_start", "date_end"]
+        fields = '__all__'
 
-class OwnershipCreateSerializer(serializers.ModelSerializer):
-    # used when creating ownerships (car and owner provided by id)
-    class Meta:
-        model = Ownership
-        fields = ["id", "owner", "car", "date_start", "date_end"]
-
-class OwnerListSerializer(serializers.ModelSerializer):
-    # minimal nested info for list endpoints
+class OwnerDetailSerializer(serializers.ModelSerializer):
     driver_license = DriverLicenseSerializer(read_only=True)
-    ownerships = OwnershipCarSerializer(many=True, read_only=True)
-
+    contacts = OwnerContactSerializer(many=True, read_only=True)
+    ownerships = OwnershipSerializer(many=True, read_only=True)
     class Meta:
         model = Owner
-        fields = ["id", "first_name", "last_name", "date_of_birth", "driver_license", "ownerships"]
-
-class OwnerCreateUpdateSerializer(serializers.ModelSerializer):
-    # used for create/update: allow nested creation of license optionally
-    driver_license = DriverLicenseSerializer(required=False, allow_null=True)
-
-    class Meta:
-        model = Owner
-        fields = ["id", "first_name", "last_name", "date_of_birth", "driver_license"]
-
-    def create(self, validated_data):
-        license_data = validated_data.pop("driver_license", None)
-        owner = Owner.objects.create(**validated_data)
-        if license_data:
-            DriverLicense.objects.create(owner=owner, **license_data)
-        return owner
-
-    def update(self, instance, validated_data):
-        license_data = validated_data.pop("driver_license", None)
-        for attr, val in validated_data.items():
-            setattr(instance, attr, val)
-        instance.save()
-        if license_data is not None:
-            # create or update license
-            DriverLicense.objects.update_or_create(owner=instance, defaults=license_data)
-        return instance
+        fields = ['id','first_name','last_name','patronymic','city','created_at','updated_at','driver_license','contacts','ownerships']

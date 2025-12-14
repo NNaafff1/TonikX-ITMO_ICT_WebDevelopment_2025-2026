@@ -1,100 +1,91 @@
+# app/models.py (append or update)
 from django.db import models
 from django.core.exceptions import ValidationError
-from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
 
 class Owner(models.Model):
-    # Автовладелец
     first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
-    date_of_birth = models.DateField(null=True, blank=True)  # optional
-
+    last_name  = models.CharField(max_length=100)
+    patronymic = models.CharField(max_length=100, null=True, blank=True)
+    city = models.CharField(max_length=100, null=True, blank=True)
+    date_of_birth = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
-        return f"{self.last_name} {self.first_name}"
-
+class OwnerContact(models.Model):
+    owner = models.ForeignKey(Owner, related_name='contacts', on_delete=models.CASCADE)
+    type = models.CharField(max_length=30)  # phone/email/address
+    value = models.CharField(max_length=250)
+    is_primary = models.BooleanField(default=False)
 
 class DriverLicense(models.Model):
-    # Удостоверение водителя — OneToOne с Owner
-    owner = models.OneToOneField(Owner, on_delete=models.CASCADE, related_name="driver_license")
+    owner = models.OneToOneField(Owner, related_name='driver_license', on_delete=models.CASCADE)
     license_number = models.CharField(max_length=50, unique=True)
-    license_type = models.CharField(max_length=20, blank=True)
+    license_type = models.CharField(max_length=10, null=True, blank=True) 
     issue_date = models.DateField()
+    issued_by = models.CharField(max_length=200, null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
 
-    def __str__(self):
-        return f"{self.license_number} ({self.owner})"
-
+class VehicleModel(models.Model):
+    manufacturer = models.CharField(max_length=100)
+    model = models.CharField(max_length=100)
+    segment = models.CharField(max_length=50, null=True, blank=True)
+    year_from = models.IntegerField(null=True, blank=True)
+    year_to = models.IntegerField(null=True, blank=True)
 
 class Car(models.Model):
-    # Автомобиль
-    make = models.CharField(max_length=100)    # Марка, e.g. Toyota
-    model = models.CharField(max_length=100)   # Модель
-    color = models.CharField(max_length=50, blank=True, null=True)
+    vehicle_model = models.ForeignKey(VehicleModel, null=True, blank=True, related_name='cars', on_delete=models.SET_NULL)
+    color = models.CharField(max_length=50, null=True, blank=True)
     vin = models.CharField(max_length=50, unique=True)
-    reg_number = models.CharField(max_length=20, blank=True, null=True)
-
-    def __str__(self):
-        return f"{self.make} {self.model} ({self.reg_number or self.vin})"
-
+    registration_number = models.CharField(max_length=20, null=True, blank=True)
+    year = models.IntegerField(null=True, blank=True)
 
 class Ownership(models.Model):
-    # Ассоциативная сущность — владение (owner <-> car) с датами
-    owner = models.ForeignKey(Owner, on_delete=models.CASCADE, related_name="ownerships")
-    car = models.ForeignKey(Car, on_delete=models.CASCADE, related_name="ownerships")
+    owner = models.ForeignKey(Owner, related_name='ownerships', on_delete=models.CASCADE)
+    car = models.ForeignKey(Car, related_name='ownerships', on_delete=models.CASCADE)
     date_start = models.DateField()
-    date_end = models.DateField(null=True, blank=True)  # null => current ownership
+    date_end = models.DateField(null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
 
     class Meta:
-        unique_together = ("owner", "car", "date_start")
-        ordering = ["-date_start"]
+        constraints = [
+            models.UniqueConstraint(fields=['owner', 'car', 'date_start'], name='unique_owner_car_date_start')
+        ]
 
     def clean(self):
-        # Validate: for the same owner+car, date ranges must not overlap
-        if self.date_end is not None and self.date_end < self.date_start:
-            raise ValidationError({"date_end": _("date_end must be after date_start")})
-
+        # Validate no overlapping periods for the same owner+car
         qs = Ownership.objects.filter(owner=self.owner, car=self.car).exclude(pk=self.pk)
-        for other in qs:
-            # other interval: [other.date_start, other.date_end or +inf)
-            a1 = self.date_start
-            a2 = self.date_end or None
-            b1 = other.date_start
-            b2 = other.date_end or None
-
-            # intervals overlap if start <= other_end and other_start <= end (with None treated as +inf)
-            def le_or_inf(x, y):
-                if y is None:
-                    return True
-                if x is None:
-                    return False
-                return x <= y
-
-            # Check overlap
-            end_a = a2
-            end_b = b2
-            if (a2 is None and b2 is None):
-                overl = True
-            elif a2 is None:
-                overl = not (b2 < a1)
-            elif b2 is None:
-                overl = not (a2 < b1)
-            else:
-                overl = not (a2 < b1 or b2 < a1)
-
-            if overl:
-                raise ValidationError(
-                    _("Ownership period overlaps with existing ownership (id=%(id)s): %(s)s - %(e)s") % {
-                        "id": other.pk,
-                        "s": other.date_start,
-                        "e": other.date_end or "present"
-                    }
-                )
-
+        for o in qs:
+            # overlap if (start <= o.end or o.end is None) and (o.start <= end or end is None)
+            if self.date_end is None and o.date_end is None:
+                raise ValidationError("Overlapping ownership period exists.")
+            start = self.date_start
+            end = self.date_end or timezone.datetime.max.date()
+            o_start = o.date_start
+            o_end = o.date_end or timezone.datetime.max.date()
+            if (start <= o_end) and (o_start <= end):
+                raise ValidationError("Overlapping ownership period exists.")
     def save(self, *args, **kwargs):
-        
         self.clean()
         super().save(*args, **kwargs)
 
-    def __str__(self):
-        return f"{self.owner} -> {self.car}: {self.date_start} - {self.date_end or 'present'}"
+class InsurancePolicy(models.Model):
+    car = models.ForeignKey(Car, related_name='policies', on_delete=models.CASCADE)
+    policy_number = models.CharField(max_length=80, unique=True)
+    insurer = models.CharField(max_length=150)
+    date_start = models.DateField()
+    date_end = models.DateField(null=True, blank=True)
+    sum_insured = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+
+class ServiceRecord(models.Model):
+    car = models.ForeignKey(Car, related_name='services', on_delete=models.CASCADE)
+    date = models.DateField()
+    mileage = models.IntegerField(null=True, blank=True)
+    description = models.TextField()
+
+class Registration(models.Model):
+    car = models.ForeignKey(Car, related_name='registrations', on_delete=models.CASCADE)
+    reg_number = models.CharField(max_length=40)
+    authority = models.CharField(max_length=200, null=True, blank=True)
+    valid_from = models.DateField()
+    valid_to = models.DateField(null=True, blank=True)
