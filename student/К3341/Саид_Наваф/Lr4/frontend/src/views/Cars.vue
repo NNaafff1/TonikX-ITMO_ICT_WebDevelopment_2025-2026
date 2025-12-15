@@ -1,10 +1,10 @@
 <template>
   <div>
     <div class="header-row">
-      <h1 class="h1">Owners</h1>
+      <h1 class="h1">Cars</h1>
       <div>
         <button class="btn" @click="refresh">Refresh</button>
-        <button class="btn secondary" @click="createOwner">Add owner</button>
+        <button class="btn secondary" @click="createCar">Add car</button>
       </div>
     </div>
 
@@ -14,21 +14,20 @@
       </div>
       <div v-else>
         <ul class="list">
-          <li v-for="o in owners" :key="o.id" class="list-item">
+          <li v-for="c in cars" :key="c.id" class="list-item">
             <div>
-              <router-link :to="{ name: 'OwnerDetail', params: { id: o.id } }">
-                <strong>{{ o.last_name }} {{ o.first_name }}</strong>
+              <router-link :to="{ name: 'CarDetail', params: { id: c.id } }">
+                <strong>{{ c.vehicle_model?.manufacturer || '' }} {{ c.vehicle_model?.model || '' }}</strong>
               </router-link>
-              <div class="small">{{ o.city || '—' }}</div>
+              <div class="small">VIN: {{ c.vin }}</div>
             </div>
             <div style="display:flex; gap:8px; align-items:center;">
-              <router-link :to="{ name: 'OwnerDetail', params: { id: o.id } }" class="small">View</router-link>
-              <router-link :to="{ name: 'OwnerEdit', params: { id: o.id } }" class="small">Edit</router-link>
+              <router-link :to="{ name: 'CarDetail', params: { id: c.id } }" class="small">View</router-link>
             </div>
           </li>
         </ul>
 
-        <EmptyState v-if="owners.length === 0">No owners yet. Click "Add owner" to create one.</EmptyState>
+        <EmptyState v-if="cars.length === 0">No cars found.</EmptyState>
       </div>
     </div>
   </div>
@@ -41,19 +40,19 @@ import EmptyState from "@/components/EmptyState.vue";
 
 export default {
   components: { LoadingSpinner, EmptyState },
-  data(){ return { owners: [], loading: true } },
+  data(){ return { cars: [], loading: true } },
   async created(){ await this.fetch(); },
   methods:{
     async fetch(){
       this.loading = true;
       try {
-        const res = await api.get("api/owners/");
-        this.owners = res.data.results || res.data;
+        const res = await api.get("api/cars/");
+        this.cars = res.data.results || res.data;
       } catch(e){ console.error(e); }
       finally{ this.loading = false; }
     },
     refresh(){ this.fetch(); },
-    createOwner(){ this.$router.push({ name: 'OwnerEdit', params: { id: 'new' } }); }
+    createCar(){ alert('Car creation UI not implemented yet'); }
   }
 }
 </script>

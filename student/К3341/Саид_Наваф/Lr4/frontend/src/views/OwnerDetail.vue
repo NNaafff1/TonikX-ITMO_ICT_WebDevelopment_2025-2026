@@ -1,55 +1,107 @@
 <template>
-  <div>
-    <button @click="$router.back()">Назад</button>
-    <div v-if="loading">Загрузка...</div>
-    <div v-else-if="owner">
-      <h2>{{ owner.last_name }} {{ owner.first_name }}</h2>
-      <p>Дата рождения: {{ owner.date_of_birth }}</p>
-
-      <div v-if="owner.driver_license">
-        <h3>Водительское удостоверение</h3>
-        <p>Номер: {{ owner.driver_license.license_number }}</p>
-        <p>Дата выдачи: {{ owner.driver_license.issue_date }}</p>
+  <div class="container">
+    <div class="card">
+      <div class="header-row">
+        <div>
+          <button class="btn-back" @click="$router.back()">← Back</button>
+        </div>
+        <div>
+          <h2 class="h1">{{ owner?.last_name }} {{ owner?.first_name }}</h2>
+          <div class="small">ID: {{ owner?.id }} • {{ owner?.created_at | shortDate }}</div>
+        </div>
+        <div>
+          <button class="btn" @click="refresh">Refresh</button>
+        </div>
       </div>
 
-      <div v-if="owner.ownerships && owner.ownerships.length">
-        <h3>Владения</h3>
-        <ul>
-          <li v-for="o in owner.ownerships" :key="o.id">
-            {{ o.car.make }} {{ o.car.model }} ({{ o.date_start }} — {{ o.date_end || 'по настоящее время' }})
-          </li>
-        </ul>
+      <div class="grid-2">
+        <div>
+          <div class="section-title">Personal</div>
+          <div class="card" style="padding:12px;">
+            <div class="kv"><b>Name</b> {{ owner?.first_name }} {{ owner?.last_name }}</div>
+            <div class="kv"><b>City</b> <span class="small">{{ owner?.city || '-' }}</span></div>
+            <div class="kv"><b>DOB</b> <span class="small">{{ owner?.date_of_birth || '-' }}</span></div>
+          </div>
+
+          <div class="section-title">Driver license</div>
+          <div class="card" style="padding:12px;">
+            <div v-if="owner?.driver_license">
+              <div class="kv"><b>Number</b> {{ owner.driver_license.license_number }}</div>
+              <div class="kv"><b>Issue date</b> {{ owner.driver_license.issue_date }}</div>
+              <div class="kv"><b>Type</b> <span class="badge secondary">{{ owner.driver_license.license_type || '—' }}</span></div>
+            </div>
+            <div v-else class="empty">No driver license recorded</div>
+          </div>
+
+          <div class="section-title">Contacts</div>
+          <ul class="list">
+            <li v-for="c in owner.contacts || []" :key="c.id" class="list-item">
+              <div>
+                <div><strong>{{ c.type }}</strong> — {{ c.value }}</div>
+                <div class="small" v-if="c.is_primary">Primary</div>
+              </div>
+              <div class="meta">ID: {{ c.id }}</div>
+            </li>
+            <li v-if="!(owner.contacts && owner.contacts.length)" class="empty">No contacts</li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="section-title">Ownerships</div>
+          <div class="card" style="padding:12px;">
+            <ul class="list">
+              <li v-for="ow in owner.ownerships || []" :key="ow.id" class="list-item">
+                <div>
+                  <router-link :to="{ name: 'CarDetail', params: { id: ow.car.id } }">
+                    <strong>{{ ow.car.vehicle_model?.manufacturer }} {{ ow.car.vehicle_model?.model }}</strong>
+                  </router-link>
+                  <div class="small">VIN: {{ ow.car.vin }}</div>
+                  <div class="small">Period: {{ ow.date_start }} — {{ ow.date_end || 'present' }}</div>
+                  <div v-if="ow.notes" class="small">Notes: {{ ow.notes }}</div>
+                </div>
+                <div class="meta">OwID: {{ ow.id }}</div>
+              </li>
+              <li v-if="!(owner.ownerships && owner.ownerships.length)" class="empty">No ownership records</li>
+            </ul>
+          </div>
+
+          <div class="section-title">Quick actions</div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn" @click="goEdit">Edit owner</button>
+            <button class="btn secondary" @click="createOwnership">Add ownership</button>
+          </div>
+        </div>
       </div>
     </div>
-    <p v-else>Владелец не найден</p>
   </div>
 </template>
 
 <script>
-import api from '@/services/api';
-
+import api from "@/services/api";
 export default {
-  name: 'OwnerDetail',
-  props: ['id'],
-  data() {
-    return { owner: null, loading: false, error: null };
-  },
-  async created() {
-    const ownerId = this.$route.params.id;
-    this.fetchOwner(ownerId);
+  name: "OwnerDetail",
+  props: ["id"],
+  data(){ return { owner: null, loading: true } },
+  async created(){
+    await this.fetchOwner();
   },
   methods: {
-    async fetchOwner(id) {
+    async fetchOwner(){
       this.loading = true;
+      const id = this.id || this.$route.params.id;
       try {
-        const res = await api.get(`/api/owners/${id}/`);
+        const res = await api.get(`api/owners/${id}/`);
         this.owner = res.data;
-      } catch (e) {
-        this.error = 'Ошибка получения владельца';
-      } finally {
-        this.loading = false;
-      }
+      } catch(e){
+        console.error(e);
+      } finally { this.loading = false; }
     },
+    refresh(){ this.fetchOwner(); },
+    goEdit(){ this.$router.push({ name: 'OwnerEdit', params: { id: this.owner.id } }).catch(()=>{}); },
+    createOwnership(){ alert('Open create ownership dialog (not implemented)'); }
   },
-};
+  filters: {
+    shortDate(val){ if(!val) return '-'; return val.split('T')[0]; }
+  }
+}
 </script>

@@ -1,50 +1,36 @@
-from rest_framework import generics
-from .models import Owner, Car, DriverLicense, Ownership
-from .serializers import (
-    OwnerListSerializer, OwnerCreateUpdateSerializer,
-    CarSerializer, DriverLicenseSerializer,
-    OwnershipCreateSerializer
-)
-from rest_framework.response import Response
-from rest_framework import status
+# app/views.py
+from rest_framework import viewsets
+from .models import Owner, Car, VehicleModel, InsurancePolicy, ServiceRecord, Registration, Ownership, OwnerContact
+from .serializers import OwnerDetailSerializer, CarListSerializer, VehicleModelSerializer, InsurancePolicySerializer, ServiceRecordSerializer, RegistrationSerializer, OwnershipSerializer, OwnerContactSerializer
 
-# Owners
+class OwnerViewSet(viewsets.ModelViewSet):
+    queryset = Owner.objects.all().order_by('last_name')
+    serializer_class = OwnerDetailSerializer
 
-class OwnerListCreateAPIView(generics.ListCreateAPIView):
-    queryset = Owner.objects.all().prefetch_related("ownerships__car").select_related("driver_license")
-    def get_serializer_class(self):
-        if self.request.method == "POST":
-            return OwnerCreateUpdateSerializer
-        return OwnerListSerializer
-
-class OwnerRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Owner.objects.all().prefetch_related("ownerships__car").select_related("driver_license")
-    def get_serializer_class(self):
-        if self.request.method in ("PUT", "PATCH"):
-            return OwnerCreateUpdateSerializer
-        return OwnerListSerializer
-
-# Cars
-
-class CarListCreateAPIView(generics.ListCreateAPIView):
+class CarViewSet(viewsets.ModelViewSet):
     queryset = Car.objects.all()
-    serializer_class = CarSerializer
+    serializer_class = CarListSerializer
 
-class CarRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Car.objects.all()
-    serializer_class = CarSerializer
+class VehicleModelViewSet(viewsets.ModelViewSet):
+    queryset = VehicleModel.objects.all()
+    serializer_class = VehicleModelSerializer
 
-# DriverLicense endpoints (optional)
+class InsurancePolicyViewSet(viewsets.ModelViewSet):
+    queryset = InsurancePolicy.objects.all()
+    serializer_class = InsurancePolicySerializer
 
-class DriverLicenseListCreateAPIView(generics.ListCreateAPIView):
-    queryset = DriverLicense.objects.all()
-    serializer_class = DriverLicenseSerializer
+class ServiceRecordViewSet(viewsets.ModelViewSet):
+    queryset = ServiceRecord.objects.all()
+    serializer_class = ServiceRecordSerializer
 
-class DriverLicenseRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = DriverLicense.objects.all()
-    serializer_class = DriverLicenseSerializer
+class RegistrationViewSet(viewsets.ModelViewSet):
+    queryset = Registration.objects.all()
+    serializer_class = RegistrationSerializer
 
-# Ownership creation endpoint (optional helper)
-class OwnershipCreateAPIView(generics.CreateAPIView):
+class OwnershipViewSet(viewsets.ModelViewSet):
     queryset = Ownership.objects.all()
-    serializer_class = OwnershipCreateSerializer
+    serializer_class = OwnershipSerializer
+
+class OwnerContactViewSet(viewsets.ModelViewSet):
+    queryset = OwnerContact.objects.all()
+    serializer_class = OwnerContactSerializer
