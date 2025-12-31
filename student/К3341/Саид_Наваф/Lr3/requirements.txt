@@ -5,3 +5,4 @@ djangorestframework-simplejwt
 drf-spectacular
 mkdocs
 mkdocs-material
+django-cors-headers
