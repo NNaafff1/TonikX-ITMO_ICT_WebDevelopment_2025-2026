@@ -1,90 +1,51 @@
+
+
+
+
 {% extends 'project_first_app/base.html' %}
 
 {% block title %}All Racing Cars{% endblock %}
 
 {% block content %}
-<div class="header">
-    <h1>🚗 All Racing Cars</h1>
-    <p>List of all registered racing vehicles</p>
-    <a href="{% url 'car_create' %}" class="owner-link">Add New Car</a>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="display-5 mb-0">🚗 All Racing Cars</h1>
+        <p class="text-muted">List of all registered racing vehicles</p>
+    </div>
+    <a href="{% url 'car_create' %}" class="btn btn-success btn-lg">Add New Car</a>
 </div>
 
-<div class="card">
-    {% if cars %}
-        <div class="owner-list">
-            {% for car in cars %}
-                <div class="card owner-card">
-                    <h3>{{ car.brand }} {{ car.model }}</h3>
-                    <div class="detail-item">
-                        <span class="detail-label">License Plate:</span>
-                        <span class="detail-value">{{ car.license_plate }}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Team:</span>
-                        <span class="detail-value">{{ car.team.name|default:"No team" }}</span>
-                    </div>
-                    {% if car.max_speed %}
-                    <div class="detail-item">
-                        <span class="detail-label">Max Speed:</span>
-                        <span class="detail-value">{{ car.max_speed }} km/h</span>
-                    </div>
-                    {% endif %}
-                    {% if car.engine_power %}
-                    <div class="detail-item">
-                        <span class="detail-label">Engine Power:</span>
-                        <span class="detail-value">{{ car.engine_power }} HP</span>
-                    </div>
-                    {% endif %}
-                    <div class="action-buttons">
-                        <a href="{% url 'car_detail' car.id %}" class="action-btn view">View</a>
-                        <a href="{% url 'car_update' car.id %}" class="action-btn edit">Edit</a>
-                        <a href="{% url 'car_delete' car.id %}" class="action-btn delete">Delete</a>
+{% if cars %}
+    <div class="row">
+        {% for car in cars %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h4 class="card-title">{{ car.brand }} {{ car.model }}</h4>
+                    <ul class="list-group list-group-flush mb-3">
+                        <li class="list-group-item"><strong>License Plate:</strong> {{ car.license_plate }}</li>
+                        <li class="list-group-item"><strong>Team:</strong> {{ car.team.name|default:"No team" }}</li>
+                        {% if car.max_speed %}
+                        <li class="list-group-item"><strong>Max Speed:</strong> {{ car.max_speed }} km/h</li>
+                        {% endif %}
+                        {% if car.engine_power %}
+                        <li class="list-group-item"><strong>Engine Power:</strong> {{ car.engine_power }} HP</li>
+                        {% endif %}
+                    </ul>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'car_detail' car.id %}" class="btn btn-outline-primary flex-fill">View</a>
+                        <a href="{% url 'car_update' car.id %}" class="btn btn-outline-warning flex-fill">Edit</a>
+                        <a href="{% url 'car_delete' car.id %}" class="btn btn-outline-danger flex-fill">Delete</a>
                     </div>
                 </div>
-            {% endfor %}
+            </div>
         </div>
-    {% else %}
-        <div class="no-owners">
-            <p>No racing cars found.</p>
-            <p>Please add some cars through the <a href="{% url 'car_create' %}">form</a>.</p>
-        </div>
-    {% endif %}
-</div>
-
-<style>
-.action-buttons {
-    display: flex;
-    gap: 0.5rem;
-    margin-top: 1rem;
-}
-
-.action-btn {
-    padding: 8px 16px;
-    text-decoration: none;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: bold;
-    transition: all 0.3s ease;
-}
-
-.action-btn.view {
-    background: #28a745;
-    color: white;
-}
-
-.action-btn.edit {
-    background: #ffc107;
-    color: black;
-}
-
-.action-btn.delete {
-    background: #dc3545;
-    color: white;
-}
-
-.action-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-}
-</style>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        <p class="mb-1">No racing cars found.</p>
+        <p>Please add some cars through the <a href="{% url 'car_create' %}">form</a>.</p>
+    </div>
+{% endif %}
 {% endblock %}
