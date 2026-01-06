@@ -3,64 +3,61 @@
 {% block title %}{{ team.name }}{% endblock %}
 
 {% block content %}
-<div class="header">
-    <h1>🏁 {{ team.name }}</h1>
-    <p>Racing Team Details</p>
-    <a href="{% url 'team_list' %}" class="back-link">← Back to All Teams</a>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="display-5 mb-0">🏁 {{ team.name }}</h1>
+        <p class="text-muted">Racing Team Details</p>
+    </div>
+    <a href="{% url 'team_list' %}" class="btn btn-secondary btn-lg">← Back to All Teams</a>
 </div>
 
-<div class="card">
-    <h2>Team Information</h2>
-    <div class="detail-grid">
-        <div class="detail-item">
-            <span class="detail-label">Team Name:</span>
-            <span class="detail-value">{{ team.name }}</span>
-        </div>
-        {% if team.founded_date %}
-        <div class="detail-item">
-            <span class="detail-label">Founded:</span>
-            <span class="detail-value">{{ team.founded_date }}</span>
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+        <h2 class="mb-0">Team Information</h2>
+    </div>
+    <div class="card-body">
+        <ul class="list-group list-group-flush mb-3">
+            <li class="list-group-item"><strong>Team Name:</strong> {{ team.name }}</li>
+            {% if team.founded_date %}
+            <li class="list-group-item"><strong>Founded:</strong> {{ team.founded_date }}</li>
+            {% endif %}
+        </ul>
+        {% if team.description %}
+        <div class="mb-3">
+            <strong>Description:</strong>
+            <div class="text-muted">{{ team.description }}</div>
         </div>
         {% endif %}
     </div>
-    {% if team.description %}
-    <div class="detail-item">
-        <span class="detail-label">Description:</span>
-        <span class="detail-value">{{ team.description }}</span>
-    </div>
-    {% endif %}
 </div>
 
-<div class="card">
-    <h2>Team Cars</h2>
-    {% with team_cars=cars|filter_by_team:team %}
-    {% if team_cars %}
-    <div class="owner-list">
-        {% for car in team_cars %}
-        <div class="card owner-card">
-            <h4>{{ car.brand }} {{ car.model }}</h4>
-            <div class="detail-item">
-                <span class="detail-label">License Plate:</span>
-                <span class="detail-value">{{ car.license_plate }}</span>
-            </div>
-            {% if car.max_speed %}
-            <div class="detail-item">
-                <span class="detail-label">Max Speed:</span>
-                <span class="detail-value">{{ car.max_speed }} km/h</span>
-            </div>
-            {% endif %}
-            {% if car.engine_power %}
-            <div class="detail-item">
-                <span class="detail-label">Engine Power:</span>
-                <span class="detail-value">{{ car.engine_power }} HP</span>
-            </div>
-            {% endif %}
-        </div>
-        {% endfor %}
+<div class="card mb-4">
+    <div class="card-header bg-info text-white">
+        <h2 class="mb-0">Team Cars</h2>
     </div>
-    {% else %}
-    <p>No cars registered for this team.</p>
-    {% endif %}
-    {% endwith %}
+    <div class="card-body">
+        {% with team_cars=cars|filter_by_team:team %}
+        {% if team_cars %}
+        <div class="row g-3">
+            {% for car in team_cars %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border border-2 border-info">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ car.brand }} {{ car.model }}</h5>
+                        <ul class="list-group list-group-flush mb-2">
+                            <li class="list-group-item"><strong>License Plate:</strong> {{ car.license_plate }}</li>
+                            {% if car.max_speed %}<li class="list-group-item"><strong>Max Speed:</strong> {{ car.max_speed }} km/h</li>{% endif %}
+                            {% if car.engine_power %}<li class="list-group-item"><strong>Engine Power:</strong> {{ car.engine_power }} HP</li>{% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-info mb-0">No cars registered for this team.</div>
+        {% endif %}
+        {% endwith %}
+    </div>
 </div>
 {% endblock %}

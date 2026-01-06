@@ -54,5 +54,3 @@ python manage.py runserver
 7) Тестирование API:
 - Зарегистрируйте пользователя через `POST /auth/users/` или создайте суперадмина `python manage.py createsuperuser`.
 - Запросите токен `POST /api/token/` и используйте `Authorization: Bearer <token>`.
-
-Если что-то не работает — отправьте сюда вывод ошибок и я помогу.

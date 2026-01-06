@@ -1,5 +1,6 @@
-from django.urls import path
+from django.urls import path , include
 from . import views
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     # Home page
@@ -28,4 +29,10 @@ urlpatterns = [
     # Team URLs
     path('teams/', views.TeamListView.as_view(), name='team_list'),
     path('teams/<int:pk>/', views.TeamDetailView.as_view(), name='team_detail'),
+       # Authentication URLs
+    path('login/', auth_views.LoginView.as_view(template_name='project_first_app/login.html'), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(next_page='/'), name='logout'),
+    
+    # Search URL
+    path('search/', views.search, name='search'),
 ]

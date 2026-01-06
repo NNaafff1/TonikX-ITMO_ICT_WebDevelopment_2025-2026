@@ -1,60 +1,78 @@
-# Модель данных
+# Модель данных (обновлённая для ЛР3)
 
-Диаграмма ER (краткое описание):
-- Owner — владелец
-  - id (PK)
-  - first_name
-  - last_name
-  - date_of_birth
-- DriverLicense — водительское удостоверение (OneToOne → Owner)
-  - id (PK)
-  - owner_id (FK → Owner)
-  - license_number (UNIQUE)
-  - license_type
-  - issue_date
-- Car — автомобиль
-  - id (PK)
-  - make
-  - model
-  - color
-  - vin (UNIQUE)
-  - reg_number
-- Ownership — владение (ассоциативная сущность Owner ⇄ Car)
-  - id (PK)
-  - owner_id (FK → Owner)
-  - car_id (FK → Car)
-  - date_start
-  - date_end (nullable)
+Ниже описаны основные сущности и их поля после обновления схемы.
 
-Ограничения и правила:
-- DriverLicense.license_number — уникален.
-- Car.vin — уникален.
-- Для одной пары (owner, car) периоды владения не должны пересекаться — это проверяется в модели Ownership (валидация в clean/save).
-- Для быстрых запросов используются related_name:
-  - Owner.ownerships (все владения владельца)
-  - Car.ownerships (все владения автомобиля)
-  - Owner.driver_license (OneToOne)
+![DB schema](images/db_schema.png)
 
-Пример фрагмента моделей (Django ORM):
-```python
-class Owner(models.Model):
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
-    date_of_birth = models.DateField(null=True, blank=True)
+Основные сущности
 
-class DriverLicense(models.Model):
-    owner = models.OneToOneField(Owner, related_name="driver_license", on_delete=models.CASCADE)
-    license_number = models.CharField(max_length=50, unique=True)
-    issue_date = models.DateField()
+- Owner (владелец)
+  - id : int (PK)
+  - first_name, last_name : varchar
+  - date_of_birth : date (nullable) — добавлено
+  - city : varchar (nullable)
+  - created_at, updated_at : datetime
+  - Связи: 1 → * OwnerContact, 1 → 1 DriverLicense, 1 → * Ownership
 
-class Car(models.Model):
-    make = models.CharField(max_length=100)
-    model = models.CharField(max_length=100)
-    vin = models.CharField(max_length=50, unique=True)
+- OwnerContact
+  - id : int (PK)
+  - owner : FK → Owner
+  - type : varchar (phone/email/address)
+  - value : varchar
+  - is_primary : boolean
 
-class Ownership(models.Model):
-    owner = models.ForeignKey(Owner, related_name="ownerships", on_delete=models.CASCADE)
-    car = models.ForeignKey(Car, related_name="ownerships", on_delete=models.CASCADE)
-    date_start = models.DateField()
-    date_end = models.DateField(null=True, blank=True)
-```
+- DriverLicense
+  - id : int (PK)
+  - owner : OneToOne → Owner
+  - license_number : varchar UNIQUE
+  - license_type : varchar (nullable) — возможно добавлено
+  - issue_date : date
+  - issued_by, notes : text (nullable)
+
+- VehicleModel
+  - id : int (PK)
+  - manufacturer : varchar
+  - model : varchar
+  - segment, year_from, year_to : optional
+
+- Car
+  - id : int (PK)
+  - vehicle_model : FK → VehicleModel (nullable)
+  - vin : varchar UNIQUE
+  - registration_number : varchar (nullable)
+  - color, year : optional
+  - Примечание: предыдущие поля make/reg_number могли быть переименованы в vehicle_model.via и registration_number.
+
+- Ownership
+  - id : int (PK)
+  - owner : FK → Owner
+  - car : FK → Car
+  - date_start : date
+  - date_end : date (nullable)
+  - notes : text (nullable)
+  - Ограничение: UniqueConstraint(owner, car, date_start)
+  - Валидация: периоды владения для одной пары (owner, car) не должны пересекаться. Реализовано в clean()/save() модели.
+
+- InsurancePolicy
+  - id : int (PK)
+  - car : FK → Car
+  - policy_number : varchar UNIQUE
+  - insurer : varchar
+  - date_start, date_end : date
+  - sum_insured : decimal (nullable)
+
+- ServiceRecord
+  - id : int (PK)
+  - car : FK → Car
+  - date : date
+  - mileage : int (nullable)
+  - description : text
+
+- Registration
+  - id : int (PK)
+  - car : FK → Car
+  - reg_number : varchar
+  - authority : varchar (nullable)
+  - valid_from : date
+  - valid_to : date (nullable)
+

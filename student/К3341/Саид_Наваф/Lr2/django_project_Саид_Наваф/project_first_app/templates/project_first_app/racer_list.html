@@ -1,43 +1,41 @@
+
+
+
 {% extends 'project_first_app/base.html' %}
 
 {% block title %}All Racers{% endblock %}
 
 {% block content %}
-<div class="header">
-    <h1>🏎️ All Racers</h1>
-    <p>List of all registered racing drivers</p>
-    <a href="{% url 'register_user' %}" class="owner-link">Register New Racer</a>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="display-5 mb-0">🏎️ All Racers</h1>
+        <p class="text-muted">List of all registered racing drivers</p>
+    </div>
+    <a href="{% url 'register_user' %}" class="btn btn-success btn-lg">Register New Racer</a>
 </div>
 
-<div class="card">
-    {% if racers %}
-        <div class="owner-list">
-            {% for racer in racers %}
-                <div class="card owner-card">
-                    <h3>{{ racer.first_name }} {{ racer.last_name }}</h3>
-                    <div class="detail-item">
-                        <span class="detail-label">Racing Class:</span>
-                        <span class="detail-value">{{ racer.racing_class|default:"Not specified" }}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Experience:</span>
-                        <span class="detail-value">{{ racer.racing_experience }} years</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Nationality:</span>
-                        <span class="detail-value">{{ racer.nationality|default:"Not specified" }}</span>
-                    </div>
-                    <a href="{% url 'racer_detail' racer.id %}" class="owner-link">
-                        View Racing Profile →
-                    </a>
+{% if racers %}
+    <div class="row g-4 mb-4">
+        {% for racer in racers %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h4 class="card-title">{{ racer.first_name }} {{ racer.last_name }}</h4>
+                    <ul class="list-group list-group-flush mb-3">
+                        <li class="list-group-item"><strong>Racing Class:</strong> {{ racer.racing_class|default:"Not specified" }}</li>
+                        <li class="list-group-item"><strong>Experience:</strong> {{ racer.racing_experience }} years</li>
+                        <li class="list-group-item"><strong>Nationality:</strong> {{ racer.nationality|default:"Not specified" }}</li>
+                    </ul>
+                    <a href="{% url 'racer_detail' racer.id %}" class="btn btn-outline-primary w-100">View Racing Profile →</a>
                 </div>
-            {% endfor %}
+            </div>
         </div>
-    {% else %}
-        <div class="no-owners">
-            <p>No racers found in the database.</p>
-            <p>Please register some racers through the <a href="{% url 'register_user' %}">registration form</a>.</p>
-        </div>
-    {% endif %}
-</div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        <p class="mb-1">No racers found in the database.</p>
+        <p>Please register some racers through the <a href="{% url 'register_user' %}">registration form</a>.</p>
+    </div>
+{% endif %}
 {% endblock %}

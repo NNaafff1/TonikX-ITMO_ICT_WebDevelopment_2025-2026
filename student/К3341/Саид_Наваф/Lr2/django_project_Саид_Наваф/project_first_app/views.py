@@ -11,6 +11,8 @@ from .forms import CustomUserCreationForm, CarForm, RaceRegistrationForm, RaceCo
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from datetime import timedelta
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Q
 # User registration view
 def register_user(request):
     if request.method == 'POST':
@@ -29,10 +31,43 @@ def register_user(request):
     return render(request, 'project_first_app/racer_register.html', {'form': form})
 
 # Racer views
+
+
+# Update existing list views with pagination
 def racer_list(request):
-    """Display all racers"""
-    racers = User.objects.all()
+    """Display all racers with pagination"""
+    racers_list = User.objects.all()
+    
+    paginator = Paginator(racers_list, 5)  # 5 racers per page
+    page = request.GET.get('page')
+    
+    try:
+        racers = paginator.page(page)
+    except PageNotAnInteger:
+        racers = paginator.page(1)
+    except EmptyPage:
+        racers = paginator.page(paginator.num_pages)
+    
     return render(request, 'project_first_app/racer_list.html', {'racers': racers})
+
+class RaceListView(ListView):
+    model = Race
+    template_name = 'project_first_app/race_list.html'
+    context_object_name = 'races'
+    ordering = ['-date']
+    paginate_by = 5  # 5 races per page
+
+class CarListView(ListView):
+    model = Car
+    template_name = 'project_first_app/car_list.html'
+    context_object_name = 'cars'
+    paginate_by = 5  # 5 cars per page
+
+class TeamListView(ListView):
+    model = Team
+    template_name = 'project_first_app/team_list.html'
+    context_object_name = 'teams'
+    paginate_by = 5  # 5 teams per page
 
 def racer_detail(request, racer_id):
     """Display details of a specific racer"""
@@ -172,3 +207,49 @@ def home(request):
         'recent_races': recent_races,
         'top_racers': top_racers
     })
+
+
+
+def search(request):
+    """Search across races, racers, and teams"""
+    query = request.GET.get('q')
+    results = {}
+    
+    if query:
+        # Search races
+        races = Race.objects.filter(
+            Q(name__icontains=query) | 
+            Q(location__icontains=query) |
+            Q(description__icontains=query)
+        )
+        
+        # Search racers
+        racers = User.objects.filter(
+            Q(first_name__icontains=query) |
+            Q(last_name__icontains=query) |
+            Q(username__icontains=query) |
+            Q(racing_class__icontains=query)
+        )
+        
+        # Search teams
+        teams = Team.objects.filter(
+            Q(name__icontains=query) |
+            Q(description__icontains=query)
+        )
+        
+        # Search cars
+        cars = Car.objects.filter(
+            Q(brand__icontains=query) |
+            Q(model__icontains=query) |
+            Q(license_plate__icontains=query)
+        )
+        
+        results = {
+            'races': races,
+            'racers': racers,
+            'teams': teams,
+            'cars': cars,
+            'query': query
+        }
+    
+    return render(request, 'project_first_app/search_results.html', results)
